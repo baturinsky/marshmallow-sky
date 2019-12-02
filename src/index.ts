@@ -4,6 +4,7 @@ import { m4, v3 } from "./twgl/twgl-full";
 import { Vec3 } from "./twgl/v3";
 import zzfxInit from "./zzfx";
 import { V2, length } from "./v2";
+import { playFile } from "./util";
 
 let volume = 1;
 
@@ -138,6 +139,23 @@ function rewind(steps = -1) {
   mouseDelta = [0,0];
 }
 
+let music: {
+  context: AudioContext;
+  gain: GainNode;
+};
+
+function toggleMusic(){
+  mute = !mute;
+  if (!music) return;
+  if (mute) {
+    music.context.suspend();
+  } else {
+    music.context.resume();
+  }
+}
+
+let mute = false;
+
 window.onload = async e => {
   let renderHQ = await prepareRender(crash, collect, collected, 1);
   let renderLQ = await prepareRender(crash, collect, collected, 0.5);
@@ -168,9 +186,17 @@ window.onload = async e => {
       return;
     }
 
+    if (e.code == "KeyM") {
+      toggleMusic();
+    }
+        
   });
-
-  canvas.addEventListener("mousedown", e => {
+  
+  canvas.addEventListener("mousedown", async e => {
+    if (!music) {
+      music = await playFile("Marshmallow_Sky.mp3");
+      if (mute) music.context.suspend();
+    }    
     if (!active()) canvas.requestPointerLock();
     else {
       if (e.button == 0 && collectedAmount > 0) {
@@ -280,7 +306,7 @@ window.onload = async e => {
       .map(n => Math.round(n))
       .join(",")} Velocity: ${Math.floor(vel)}`;
     orbsDiv.innerText = `Orbs: ${collectedAmount}/${orbsToCollect}`;
-    render(time, pos, dir);
+    render(time, pos, dir, music ? music.context.currentTime : 0,);
     loops++;
     window.requestAnimationFrame(loop);
   }

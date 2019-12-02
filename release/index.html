@@ -464,6 +464,7 @@ in vec2 v_texCoord;
 uniform float u_resolution;
 uniform float u_scale;
 uniform float u_time;
+uniform float u_musicTime;
 uniform float u_near;
 uniform float u_far;
 uniform mat4 u_worldViewProjection;
@@ -549,9 +550,9 @@ vec3 nearestOrb(vec3 pos){
   return vec3(chunk * orbChunkSize, h);
 }
 
-float sdf(vec3 pos){
+float sdfTime(vec3 pos, float time){
   float scale = u_scale / u_resolution;
-  float simplex = snoise(pos * vec3(1. / 500., 1./ 500., 1. / 250.) + vec3(0., 0., - u_time * .005));
+  float simplex = snoise(pos * vec3(1. / 500., 1./ 500., 1. / 250.) + vec3(0., 0., - time * .005));
   float f = (sin(simplex * 5.) + pos.z * scale * 0.01) * 2.;
   //f += snoise2d(pos.xy / 10.) * 0.1;
   //f += sin(pos.x * 0.5) * 0.2 + sin(pos.y * 0.5) * 0.2;
@@ -571,15 +572,24 @@ float sdf(vec3 pos){
   return f;
 }
 
+float sdf(vec3 pos){
+  return sdfTime(pos, u_time);
+}
+
+float sdfMusic(vec3 pos){
+  return sdfTime(pos, u_time + u_musicTime * 3.);
+}
+
+
 const float normalDelta1 = 1.;
 const float normalDelta2 = 0.1;
 
 vec3 normalSdfDelta(vec3 pos, float delta){
-  float a = sdf(pos);
+  float a = sdfMusic(pos);
   vec2 d = vec2(delta,0.);
-  float x = sdf(pos + d.xyy) - a;
-  float y = sdf(pos + d.yxy) - a;
-  float z = sdf(pos + d.yyx) - a;
+  float x = sdfMusic(pos + d.xyy) - a;
+  float y = sdfMusic(pos + d.yxy) - a;
+  float z = sdfMusic(pos + d.yyx) - a;
   return normalize(vec3(x,y,z));
 }
 

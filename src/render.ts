@@ -183,9 +183,9 @@ export async function prepareRender(
 
   let collectedBits = new Int32Array(100);
 
-  let render: (time: number, pos: Vec3, dir: Vec3) => void;
+  let render: (time: number, pos: Vec3, dir: Vec3, musicTime:number) => void;
 
-  render = (time: number, eye: Vec3, direction: Vec3) => {
+  render = (time: number, eye: Vec3, direction: Vec3, musicTime:number) => {
     const fov = (40 * Math.PI) / 180;
     const aspect = canvas.clientWidth / canvas.clientHeight;
     const zNear = 0.5;
@@ -238,7 +238,8 @@ export async function prepareRender(
       u_inverseWorldViewProjection: inverseViewProjectionTransform,
       u_raycastProjection: raycastProjection,
       u_collected: collectedBits,
-      u_noise: noise
+      u_noise: noise,
+      u_musicTime: Math.sin(0.5 * musicTime / 60 * 102 * Math.PI) * 0.1
     };
 
     Object.assign(lightPass.uniforms, uniforms);

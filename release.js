@@ -18,5 +18,6 @@ let package = index.replace("</body>", "</body>" + all.join("\n"));
 fs.writeFileSync("release/index.html", package)
 fs.copyFileSync("public/bundle.js", "release/bundle.js")
 fs.copyFileSync("public/favicon.png", "release/favicon.png")
+fs.copyFileSync("public/Marshmallow_Sky.mp3", "release/Marshmallow_Sky.mp3")
 
 zipFolder.zipFolder('release', 'glide.zip', err=> {if(err) console.log(err)})
